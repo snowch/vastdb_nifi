@@ -4,6 +4,7 @@
 
 import datetime
 import io
+import json
 import os
 import platform
 import sys
@@ -28,8 +29,10 @@ class CustomBuildHook(BuildHookInterface):
         super().__init__(root, config, *args, **kwargs)
 
     def update(self, metadata):
-        # Store the version in the metadata
-        metadata['plugin_data']['custom']['version'] = metadata['version']
+        # Store the version in a temporary JSON file
+        version_data = {'version': metadata['version']}
+        with open('version.json', 'w') as f:
+            json.dump(version_data, f)
 
 class NarBundle:
     DIRECTORY_MODE = 0o755
@@ -74,6 +77,10 @@ class NarBundle:
 
         build_timestamp = current_timestamp.strftime(self.BUILD_TIMESTAMP_FORMAT)
 
+        with open('version.json', 'r') as f:
+            version_data = json.load(f)
+        version = version_data.get('version', 'unknown')
+
         manifest_lines = [
             "Manifest-Version: 1.0",
             "Created-By: hatch-nar-plugin",
@@ -81,7 +88,7 @@ class NarBundle:
             f"Nar-Id: {metadata.core.raw_name}-nar",
             f"Nar-Group: {metadata.core.raw_name}",
             # f"Nar-Version: {metadata.version}",
-            f"Nar-Version: {metadata.plugin_data.get('custom', {}).get('version', 'unknown')}",
+            f"Nar-Version: {version}",
 
         ]
 
