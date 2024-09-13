@@ -131,7 +131,8 @@ class CustomBuilder(BuilderInterface):
         project_name = self.normalize_file_name_component(self.metadata.core.raw_name)
         os_name = platform.system().lower()
         arch_name = platform.machine().lower()
-        target_nar = Path(build_directory, f"{project_name}-{self.metadata.version}-{os_name}-{arch_name}.nar")
+        python_version = f"py{sys.version_info.major}{sys.version_info.minor}"
+        target_nar = Path(build_directory, f"{project_name}-{self.metadata.version}-{os_name}-{arch_name}-{python_version}.nar")
 
         with NarBundle.open_bundle(target_nar) as nar:
 
