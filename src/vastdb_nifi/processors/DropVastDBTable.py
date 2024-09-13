@@ -17,7 +17,8 @@ class DropVastDBTable(FlowFileTransform):
         tags = ["vastdb", "arrow"]
         description = """Drop Vast DB Table."""
 
-    def __init__(self):
+    # ruff: noqa: ARG002
+    def __init__(self, **kwargs):
         self.vastdb_endpoint = PropertyDescriptor(
             name="VastDB Endpoint",
             description="AWS_S3_ENDPOINT_URL",

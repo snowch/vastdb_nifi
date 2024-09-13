@@ -22,7 +22,8 @@ class PutVastDB(FlowFileTransform):
         tags = ["vastdb", "arrow"]
         description = """Publishes Parquet or JSON data to a Vast DB."""
 
-    def __init__(self):
+    # ruff: noqa: ARG002
+    def __init__(self, **kwargs):
         self.vastdb_endpoint = PropertyDescriptor(
             name="VastDB Endpoint",
             description="AWS_S3_ENDPOINT_URL",
