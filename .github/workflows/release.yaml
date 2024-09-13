@@ -27,10 +27,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install hatch hatchling
 
-      - name: Build package
-        run: hatch build
+      - name: Build NAR
+          run: hatch build -t custom
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: dist/*.nar
