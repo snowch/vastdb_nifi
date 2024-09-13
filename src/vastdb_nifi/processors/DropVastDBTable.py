@@ -9,46 +9,51 @@ from nifiapi.properties import ExpressionLanguageScope, PropertyDescriptor, Stan
 
 class DropVastDBTable(FlowFileTransform):
     class Java:
-        implements = ['org.apache.nifi.python.processor.FlowFileTransform']
+        implements = ["org.apache.nifi.python.processor.FlowFileTransform"]
 
     class ProcessorDetails:
-        dependencies = ['vastdb', 'pyarrow']
-        version = '0.0.4-SNAPSHOT'
-        tags = ['vastdb', 'arrow']
+        dependencies = ["vastdb", "pyarrow"]
+        version = "0.0.4-SNAPSHOT"
+        tags = ["vastdb", "arrow"]
         description = """Drop Vast DB Table."""
 
     def __init__(self):
         self.vastdb_endpoint = PropertyDescriptor(
             name="VastDB Endpoint",
             description="AWS_S3_ENDPOINT_URL",
-            required = True,
+            required=True,
             default_value="http://vip-pool.v123-xy.VastENG.lab",
-            validators = [StandardValidators.URL_VALIDATOR])
+            validators=[StandardValidators.URL_VALIDATOR],
+        )
 
         self.vastdb_credentials_provider_service = PropertyDescriptor(
             name="VastDB Credentials Provider Service",
             description="The Controller Service that is used to obtain VastDB credentials.",
             required=True,
-            controller_service_definition="org.apache.nifi.processors.aws.credentials.provider.service.AWSCredentialsProviderService")
+            controller_service_definition="org.apache.nifi.processors.aws.credentials.provider.service.AWSCredentialsProviderService",
+        )
 
         self.vastdb_bucket = PropertyDescriptor(
-            name='VastDB Bucket',
-            description='The VastDB bucket.',
+            name="VastDB Bucket",
+            description="The VastDB bucket.",
             required=True,
-            validators=[StandardValidators.NON_EMPTY_VALIDATOR])
+            validators=[StandardValidators.NON_EMPTY_VALIDATOR],
+        )
 
         self.vastdb_schema = PropertyDescriptor(
-            name='VastDB Database Schema',
-            description='The VastDB database schema.',
+            name="VastDB Database Schema",
+            description="The VastDB database schema.",
             required=True,
-            validators=[StandardValidators.NON_EMPTY_VALIDATOR])
+            validators=[StandardValidators.NON_EMPTY_VALIDATOR],
+        )
 
         self.vastdb_table = PropertyDescriptor(
-            name='VastDB Table Name',
-            description='The VastDB table name to drop.',
+            name="VastDB Table Name",
+            description="The VastDB table name to drop.",
             required=True,
             expression_language_scope=ExpressionLanguageScope.FLOWFILE_ATTRIBUTES,
-            validators=[StandardValidators.NON_EMPTY_VALIDATOR])
+            validators=[StandardValidators.NON_EMPTY_VALIDATOR],
+        )
 
         self.descriptors = [
             self.vastdb_endpoint,
@@ -56,31 +61,28 @@ class DropVastDBTable(FlowFileTransform):
             self.vastdb_bucket,
             self.vastdb_schema,
             self.vastdb_table,
-            ]
+        ]
 
     # Processor properties
     def getPropertyDescriptors(self):
         return self.descriptors
 
-
     def transform(self, context, flowfile):
-
         session = self.get_vastdb_session(context)
         self.drop_table(context, flowfile, session)
 
-        return FlowFileTransformResult(relationship = "success")
+        return FlowFileTransformResult(relationship="success")
 
     def get_vastdb_session(self, context):
-
         vastdb_endpoint = context.getProperty(self.vastdb_endpoint.name).getValue()
-        credentials_provider_service = context.getProperty(self.vastdb_credentials_provider_service.name).asControllerService()
+        credentials_provider_service = context.getProperty(
+            self.vastdb_credentials_provider_service.name
+        ).asControllerService()
         credentials = credentials_provider_service.getAwsCredentialsProvider().resolveCredentials()
 
         try:
             session = vastdb.connect(
-                endpoint=vastdb_endpoint,
-                access=credentials.accessKeyId(),
-                secret=credentials.secretAccessKey()
+                endpoint=vastdb_endpoint, access=credentials.accessKeyId(), secret=credentials.secretAccessKey()
             )
             self.logger.info("Connected to VastDB")
         except Exception as e:
@@ -90,7 +92,6 @@ class DropVastDBTable(FlowFileTransform):
             return session
 
     def drop_table(self, context, flowfile, session):
-
         vastdb_bucket = context.getProperty(self.vastdb_bucket.name).getValue()
         vastdb_schema = context.getProperty(self.vastdb_schema.name).getValue()
 

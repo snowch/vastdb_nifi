@@ -15,52 +15,58 @@ from nifiapi.properties import PropertyDescriptor, StandardValidators
 
 class ImportVastDB(FlowFileTransform):
     class Java:
-        implements = ['org.apache.nifi.python.processor.FlowFileTransform']
+        implements = ["org.apache.nifi.python.processor.FlowFileTransform"]
 
     class ProcessorDetails:
-        dependencies = ['vastdb', 'pyarrow']
-        version = '0.0.4-SNAPSHOT'
-        tags = ['vastdb', 'arrow']
+        dependencies = ["vastdb", "pyarrow"]
+        version = "0.0.4-SNAPSHOT"
+        tags = ["vastdb", "arrow"]
         description = """Imports parquet files from S3."""
 
     def __init__(self):
         self.vastdb_endpoint = PropertyDescriptor(
             name="VastDB Endpoint",
             description="AWS_S3_ENDPOINT_URL",
-            required = True,
+            required=True,
             default_value="http://vip-pool.v123-xy.VastENG.lab",
-            validators = [StandardValidators.URL_VALIDATOR])
+            validators=[StandardValidators.URL_VALIDATOR],
+        )
 
         self.vastdb_credentials_provider_service = PropertyDescriptor(
             name="VastDB Credentials Provider Service",
             description="The Controller Service that is used to obtain VastDB credentials.",
             required=True,
-            controller_service_definition="org.apache.nifi.processors.aws.credentials.provider.service.AWSCredentialsProviderService")
+            controller_service_definition="org.apache.nifi.processors.aws.credentials.provider.service.AWSCredentialsProviderService",
+        )
 
         self.vastdb_bucket = PropertyDescriptor(
-            name='VastDB Bucket',
-            description='The VastDB bucket to write to',
+            name="VastDB Bucket",
+            description="The VastDB bucket to write to",
             required=True,
-            validators=[StandardValidators.NON_EMPTY_VALIDATOR])
+            validators=[StandardValidators.NON_EMPTY_VALIDATOR],
+        )
 
         self.vastdb_schema = PropertyDescriptor(
-            name='VastDB Database Schema',
-            description='The VastDB database schema to write to',
+            name="VastDB Database Schema",
+            description="The VastDB database schema to write to",
             required=True,
-            validators=[StandardValidators.NON_EMPTY_VALIDATOR])
+            validators=[StandardValidators.NON_EMPTY_VALIDATOR],
+        )
 
         self.vastdb_table = PropertyDescriptor(
-            name='VastDB Table Name',
-            description='The VastDB table name to write to (or create)',
+            name="VastDB Table Name",
+            description="The VastDB table name to write to (or create)",
             required=True,
-            validators=[StandardValidators.NON_EMPTY_VALIDATOR])
+            validators=[StandardValidators.NON_EMPTY_VALIDATOR],
+        )
 
         self.schema_merge_function = PropertyDescriptor(
-            name='Schema Merge',
-            description='Schema Merge',
-            allowable_values=['Union', 'Strict', 'Child'],
+            name="Schema Merge",
+            description="Schema Merge",
+            allowable_values=["Union", "Strict", "Child"],
             required=True,
-            default_value='Union')
+            default_value="Union",
+        )
 
         self.descriptors = [
             self.vastdb_endpoint,
@@ -68,16 +74,14 @@ class ImportVastDB(FlowFileTransform):
             self.vastdb_bucket,
             self.vastdb_schema,
             self.vastdb_table,
-            self.schema_merge_function
-            ]
+            self.schema_merge_function,
+        ]
 
     # Processor properties
     def getPropertyDescriptors(self):
         return self.descriptors
 
-
     def transform(self, context, flowfile):
-
         json_content = json.loads(flowfile.getContentsAsBytes())
 
         parquet_file_list = []
@@ -95,19 +99,18 @@ class ImportVastDB(FlowFileTransform):
         session = self.get_vastdb_session(context)
         self.import_tables(context, session, parquet_file_list)
 
-        return FlowFileTransformResult(relationship = "success")
+        return FlowFileTransformResult(relationship="success")
 
     def get_vastdb_session(self, context):
-
         vastdb_endpoint = context.getProperty(self.vastdb_endpoint.name).getValue()
-        credentials_provider_service = context.getProperty(self.vastdb_credentials_provider_service.name).asControllerService()
+        credentials_provider_service = context.getProperty(
+            self.vastdb_credentials_provider_service.name
+        ).asControllerService()
         credentials = credentials_provider_service.getAwsCredentialsProvider().resolveCredentials()
 
         try:
             session = vastdb.connect(
-                endpoint=vastdb_endpoint,
-                access=credentials.accessKeyId(),
-                secret=credentials.secretAccessKey()
+                endpoint=vastdb_endpoint, access=credentials.accessKeyId(), secret=credentials.secretAccessKey()
             )
             self.logger.info("Connected to VastDB")
         except Exception as e:
@@ -117,7 +120,6 @@ class ImportVastDB(FlowFileTransform):
             return session
 
     def import_tables(self, context, session, parquet_file_list):
-
         vastdb_bucket = context.getProperty(self.vastdb_bucket.name).getValue()
         vastdb_schema = context.getProperty(self.vastdb_schema.name).getValue()
         vastdb_table = context.getProperty(self.vastdb_table.name).getValue()
@@ -144,21 +146,12 @@ class ImportVastDB(FlowFileTransform):
             table.import_files(parquet_file_list)
             self.logger.info(f"Finished import of {num_parquet_files} files to table: {vastdb_table}")
 
-    def create_table_from_files(
-            self,
-            context,
-            schema,
-            table_name: str,
-            parquet_file_list: list[str],
-            pa_schema = None
-            ):
-
-
+    def create_table_from_files(self, context, schema, table_name: str, parquet_file_list: list[str], pa_schema=None):
         vastdb_schema_merge_function = context.getProperty(self.schema_merge_function.name).getValue()
 
-        if vastdb_schema_merge_function == 'Strict':
+        if vastdb_schema_merge_function == "Strict":
             schema_merge_function = self.strict_schema_merge
-        elif vastdb_schema_merge_function == 'Child':
+        elif vastdb_schema_merge_function == "Child":
             schema_merge_function = self.child_schema_merge
         else:
             schema_merge_function = self.union_schema_merge
@@ -166,16 +159,14 @@ class ImportVastDB(FlowFileTransform):
         tx = schema.tx
         current_schema = pa.schema([]) if pa_schema is None else pa_schema
         s3fs = pa.fs.S3FileSystem(
-            access_key=tx._rpc.api.access_key,
-            secret_key=tx._rpc.api.secret_key,
-            endpoint_override=tx._rpc.api.url
-            )
+            access_key=tx._rpc.api.access_key, secret_key=tx._rpc.api.secret_key, endpoint_override=tx._rpc.api.url
+        )
 
         for prq_file in parquet_file_list:
-            if not prq_file.startswith('/'):
+            if not prq_file.startswith("/"):
                 error_message = f"Path {prq_file} must start with a '/'"
                 raise ValueError(error_message)
-            parquet_ds = pq.ParquetDataset(prq_file.lstrip('/'), filesystem=s3fs)
+            parquet_ds = pq.ParquetDataset(prq_file.lstrip("/"), filesystem=s3fs)
             current_schema = schema_merge_function(current_schema, parquet_ds.schema)
 
         if pa_schema is None:
@@ -183,7 +174,9 @@ class ImportVastDB(FlowFileTransform):
                 self.logger.info(f"Creating schema.table '{schema.name}.{table_name}'")
                 return schema.create_table(table_name, current_schema)
             except Exception as e:
-                error_message = f"Failed to create schema.table '{schema.name}.{table_name}' with pyarrow schema '{current_schema}'"
+                error_message = (
+                    f"Failed to create schema.table '{schema.name}.{table_name}' with pyarrow schema '{current_schema}'"
+                )
                 raise RuntimeError(error_message) from e
         return None
 

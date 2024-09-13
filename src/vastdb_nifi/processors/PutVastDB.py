@@ -14,52 +14,58 @@ from pyarrow import json as pa_json
 
 class PutVastDB(FlowFileTransform):
     class Java:
-        implements = ['org.apache.nifi.python.processor.FlowFileTransform']
+        implements = ["org.apache.nifi.python.processor.FlowFileTransform"]
 
     class ProcessorDetails:
-        dependencies = ['vastdb', 'pyarrow']
-        version = '0.0.4-SNAPSHOT'
-        tags = ['vastdb', 'arrow']
+        dependencies = ["vastdb", "pyarrow"]
+        version = "0.0.4-SNAPSHOT"
+        tags = ["vastdb", "arrow"]
         description = """Publishes Parquet or JSON data to a Vast DB."""
 
     def __init__(self):
         self.vastdb_endpoint = PropertyDescriptor(
             name="VastDB Endpoint",
             description="AWS_S3_ENDPOINT_URL",
-            required = True,
+            required=True,
             default_value="http://vip-pool.v123-xy.VastENG.lab",
-            validators = [StandardValidators.URL_VALIDATOR])
+            validators=[StandardValidators.URL_VALIDATOR],
+        )
 
         self.vastdb_credentials_provider_service = PropertyDescriptor(
             name="VastDB Credentials Provider Service",
             description="The Controller Service that is used to obtain VastDB credentials.",
             required=True,
-            controller_service_definition="org.apache.nifi.processors.aws.credentials.provider.service.AWSCredentialsProviderService")
+            controller_service_definition="org.apache.nifi.processors.aws.credentials.provider.service.AWSCredentialsProviderService",
+        )
 
         self.vastdb_bucket = PropertyDescriptor(
-            name='VastDB Bucket',
-            description='The VastDB bucket to write to',
+            name="VastDB Bucket",
+            description="The VastDB bucket to write to",
             required=True,
-            validators=[StandardValidators.NON_EMPTY_VALIDATOR])
+            validators=[StandardValidators.NON_EMPTY_VALIDATOR],
+        )
 
         self.vastdb_schema = PropertyDescriptor(
-            name='VastDB Database Schema',
-            description='The VastDB database schema to write to',
+            name="VastDB Database Schema",
+            description="The VastDB database schema to write to",
             required=True,
-            validators=[StandardValidators.NON_EMPTY_VALIDATOR])
+            validators=[StandardValidators.NON_EMPTY_VALIDATOR],
+        )
 
         self.vastdb_table = PropertyDescriptor(
-            name='VastDB Table Name',
-            description='The VastDB table name to write to (or create)',
+            name="VastDB Table Name",
+            description="The VastDB table name to write to (or create)",
             required=True,
-            validators=[StandardValidators.NON_EMPTY_VALIDATOR])
+            validators=[StandardValidators.NON_EMPTY_VALIDATOR],
+        )
 
         self.incoming_data_type = PropertyDescriptor(
-            name='Data Type',
-            description='Data Type',
-            allowable_values=['Parquet', 'Json'],
+            name="Data Type",
+            description="Data Type",
+            allowable_values=["Parquet", "Json"],
             required=True,
-            default_value='Parquet')
+            default_value="Parquet",
+        )
 
         self.descriptors = [
             self.vastdb_endpoint,
@@ -67,20 +73,18 @@ class PutVastDB(FlowFileTransform):
             self.vastdb_bucket,
             self.vastdb_schema,
             self.vastdb_table,
-            self.incoming_data_type
-            ]
+            self.incoming_data_type,
+        ]
 
     # Processor properties
     def getPropertyDescriptors(self):
         return self.descriptors
 
-
     def transform(self, context, flowfile):
-
         incoming_data_type = context.getProperty(self.incoming_data_type.name).getValue()
 
         session = self.get_vastdb_session(context)
-        pa_table = self.read_json(flowfile) if incoming_data_type == 'Json' else self.read_parquet(flowfile)
+        pa_table = self.read_json(flowfile) if incoming_data_type == "Json" else self.read_parquet(flowfile)
 
         schema = pa_table.schema
 
@@ -95,7 +99,7 @@ class PutVastDB(FlowFileTransform):
 
         # failed_batches = self.write_to_vastdb(context, session, pa_table)
         self.write_to_vastdb(context, session, pa_table_without_nulls)
-        return FlowFileTransformResult(relationship = "success")
+        return FlowFileTransformResult(relationship="success")
 
     def read_parquet(self, flowfile):
         try:
@@ -125,16 +129,15 @@ class PutVastDB(FlowFileTransform):
             raise RuntimeError(error_message) from e
 
     def get_vastdb_session(self, context):
-
         vastdb_endpoint = context.getProperty(self.vastdb_endpoint.name).getValue()
-        credentials_provider_service = context.getProperty(self.vastdb_credentials_provider_service.name).asControllerService()
+        credentials_provider_service = context.getProperty(
+            self.vastdb_credentials_provider_service.name
+        ).asControllerService()
         credentials = credentials_provider_service.getAwsCredentialsProvider().resolveCredentials()
 
         try:
             session = vastdb.connect(
-                endpoint=vastdb_endpoint,
-                access=credentials.accessKeyId(),
-                secret=credentials.secretAccessKey()
+                endpoint=vastdb_endpoint, access=credentials.accessKeyId(), secret=credentials.secretAccessKey()
             )
             self.logger.info("Connected to VastDB")
         except Exception as e:
@@ -144,7 +147,6 @@ class PutVastDB(FlowFileTransform):
             return session
 
     def write_to_vastdb(self, context, session, pa_table):
-
         vastdb_bucket = context.getProperty(self.vastdb_bucket.name).getValue()
         vastdb_schema = context.getProperty(self.vastdb_schema.name).getValue()
         vastdb_table = context.getProperty(self.vastdb_table.name).getValue()
@@ -173,17 +175,17 @@ class PutVastDB(FlowFileTransform):
 
             table.insert(pa_table)
 
-           # record_batches = pa_table.to_batches(max_chunksize=batch_size)
+        # record_batches = pa_table.to_batches(max_chunksize=batch_size)
 
-           # failed_batches = []
-           # for batch in record_batches:
-           #     try:
-           #         table.insert(batch)
-           #     except Exception as e:
-           #         self.logger.info(f"Failed to insert batch: {e}")
-           #         failed_batches.append(batch.to_pylist)
-           #
-           # return failed_batches
+        # failed_batches = []
+        # for batch in record_batches:
+        #     try:
+        #         table.insert(batch)
+        #     except Exception as e:
+        #         self.logger.info(f"Failed to insert batch: {e}")
+        #         failed_batches.append(batch.to_pylist)
+        #
+        # return failed_batches
 
     def get_columns_to_add(self, existing_schema, desired_schema):
         """

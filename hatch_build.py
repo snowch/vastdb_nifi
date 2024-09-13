@@ -27,6 +27,7 @@ class CustomBuildHook(BuildHookInterface):
     def __init__(self, root, config, *args, **kwargs):
         super().__init__(root, config, *args, **kwargs)
 
+
 class NarBundle:
     DIRECTORY_MODE = 0o755
 
@@ -95,7 +96,6 @@ class NarBundle:
 
 
 class CustomBuilder(BuilderInterface):
-
     def get_version_api(self) -> dict[str, Callable[..., str]]:
         return {"standard": self.build_standard}
 
@@ -117,10 +117,11 @@ class CustomBuilder(BuilderInterface):
         os_name = platform.system().lower()
         arch_name = platform.machine().lower()
         python_version = f"py{sys.version_info.major}{sys.version_info.minor}"
-        target_nar = Path(build_directory, f"{project_name}-{self.metadata.version}-{os_name}-{arch_name}-{python_version}.nar")
+        target_nar = Path(
+            build_directory, f"{project_name}-{self.metadata.version}-{os_name}-{arch_name}-{python_version}.nar"
+        )
 
         with NarBundle.open_bundle(target_nar) as nar:
-
             nar.write_manifest(self.metadata)
 
             for included_file in self.recurse_included_files():
