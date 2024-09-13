@@ -1,7 +1,7 @@
 # VastDB NiFi
 
-[![PyPI - Version](https://img.shields.io/pypi/v/vastdb-nifi.svg)](https://pypi.org/project/vastdb-nifi)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/vastdb-nifi.svg)](https://pypi.org/project/vastdb-nifi)
+[![Supported Python versions](https://img.shields.io/badge/python-3.7&nbsp;%7C%203.8&nbsp;%7C%203.9&nbsp;%7C%203.10&nbsp;%7C%203.11-blue)](https://www.python.org/)
+[![Supported Platforms](https://img.shields.io/badge/platform-macos%20%7C%20linux-lightgrey)](https://www.python.org/)
 
 -----
 
