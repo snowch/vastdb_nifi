@@ -16,7 +16,7 @@
 
 ## Installation
 
- - [NiFi Standard 2.0.0-M4](https://nifi.apache.org/download/) [or later] installed (the installation directory will be referred to as `$NIFI_HOME`)
+ - [NiFi Standard 2.0.0-M4](https://nifi.apache.org/download/) [or later] installed ([install docs](https://nifi.apache.org/docs/nifi-docs/html/getting-started.html#downloading-and-installing-nifi)).  The installation directory will be referred to as `$NIFI_HOME`.
  - Uncomment `nifi.python.command=python3` in `$NIFI_HOME/conf/nifi.properties`
  - Python3 must be 3.9+
  - Download the [nar file](https://github.com/snowch/vastdb_nifi/releases/latest) for your platform and Python version
