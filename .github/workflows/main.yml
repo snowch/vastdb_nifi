@@ -29,5 +29,5 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: nar-artifact-${{ matrix.os }}-${{ matrix.python-version }}
+        name: ${{ steps.get_nar_filename.outputs.nar_filename }}
         path: dist/*.nar
