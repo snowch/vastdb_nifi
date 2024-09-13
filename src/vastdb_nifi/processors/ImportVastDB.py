@@ -2,8 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
+# ruff: noqa: SLF001
+
 import json
-from typing import List
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -22,7 +23,7 @@ class ImportVastDB(FlowFileTransform):
         tags = ['vastdb', 'arrow']
         description = """Imports parquet files from S3."""
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         self.vastdb_endpoint = PropertyDescriptor(
             name="VastDB Endpoint",
             description="AWS_S3_ENDPOINT_URL",
@@ -86,7 +87,8 @@ class ImportVastDB(FlowFileTransform):
                 transformed_key = f"/{item['bucket']}/{item['key']}"
                 parquet_file_list.append(transformed_key)
             else:
-                raise ValueError("Incoming JSON must have 'key' and 'bucket'")
+                error_message = "Incoming JSON must have 'key' and 'bucket'"
+                raise ValueError(error_message)
 
         self.logger.info(f"Received parquet_file_list: {parquet_file_list}")
 
@@ -108,9 +110,11 @@ class ImportVastDB(FlowFileTransform):
                 secret=credentials.secretAccessKey()
             )
             self.logger.info("Connected to VastDB")
-            return session
         except Exception as e:
-            raise Exception(f"Failed to connect to VastDB: {e}") from e
+            error_message = f"Failed to connect to VastDB: {e}"
+            raise RuntimeError(error_message) from e
+        else:
+            return session
 
     def import_tables(self, context, session, parquet_file_list):
 
@@ -126,7 +130,8 @@ class ImportVastDB(FlowFileTransform):
                 try:
                     schema = bucket.create_schema(vastdb_schema)
                 except Exception as e:
-                    raise Exception(f"Couldn't create schema: {vastdb_schema}") from e
+                    error_message = f"Couldn't create schema: {vastdb_schema}"
+                    raise RuntimeError(error_message) from e
 
             table: vastdb.table.Table = schema.table(vastdb_table, fail_if_missing=False)
             if table is None:
@@ -144,9 +149,10 @@ class ImportVastDB(FlowFileTransform):
             context,
             schema,
             table_name: str,
-            parquet_file_list: List[str],
+            parquet_file_list: list[str],
             pa_schema = None
             ):
+
 
         vastdb_schema_merge_function = context.getProperty(self.schema_merge_function.name).getValue()
 
@@ -160,25 +166,26 @@ class ImportVastDB(FlowFileTransform):
         tx = schema.tx
         current_schema = pa.schema([]) if pa_schema is None else pa_schema
         s3fs = pa.fs.S3FileSystem(
-            access_key=tx._rpc.api.access_key, secret_key=tx._rpc.api.secret_key, endpoint_override=tx._rpc.api.url)
+            access_key=tx._rpc.api.access_key,
+            secret_key=tx._rpc.api.secret_key,
+            endpoint_override=tx._rpc.api.url
+            )
 
         for prq_file in parquet_file_list:
             if not prq_file.startswith('/'):
-                raise ValueError(f"Path {prq_file} must start with a '/'")
+                error_message = f"Path {prq_file} must start with a '/'"
+                raise ValueError(error_message)
             parquet_ds = pq.ParquetDataset(prq_file.lstrip('/'), filesystem=s3fs)
             current_schema = schema_merge_function(current_schema, parquet_ds.schema)
-
-        # self.logger.info("Creating table %s from %d Parquet files, with schema: %s",
-        #       table_name, len(parquet_files), current_schema)
 
         if pa_schema is None:
             try:
                 self.logger.info(f"Creating schema.table '{schema.name}.{table_name}'")
                 return schema.create_table(table_name, current_schema)
             except Exception as e:
-                raise Exception(
-                    f"Failed to create schema.table '{schema.name}.{table_name}' with pyarrow schema '{current_schema}'"
-                ) from e
+                error_message = f"Failed to create schema.table '{schema.name}.{table_name}' with pyarrow schema '{current_schema}'"
+                raise RuntimeError(error_message) from e
+        return None
 
     def child_schema_merge(self, current_schema: pa.Schema, new_schema: pa.Schema) -> pa.Schema:
         """
@@ -198,7 +205,8 @@ class ImportVastDB(FlowFileTransform):
 
         if not s1.issubset(s2):
             self.logger.error("Schema mismatch. schema: %s isn't contained in schema: %s.", s1, s2)
-            raise ValueError("Found mismatch in parquet files schemas.")
+            error_message = "Found mismatch in parquet files schemas."
+            raise ValueError(error_message)
         return result
 
     def strict_schema_merge(self, current_schema: pa.Schema, new_schema: pa.Schema) -> pa.Schema:
@@ -207,7 +215,8 @@ class ImportVastDB(FlowFileTransform):
         Raises an ValueError if schemas aren't identical.
         """
         if current_schema.names and current_schema != new_schema:
-            raise ValueError(f"Schemas are not identical. \n {current_schema} \n vs \n {new_schema}")
+            error_message = f"Schemas are not identical. \n {current_schema} \n vs \n {new_schema}"
+            raise ValueError(error_message)
 
         return new_schema
 

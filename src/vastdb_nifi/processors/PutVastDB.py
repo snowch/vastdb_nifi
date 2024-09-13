@@ -22,7 +22,7 @@ class PutVastDB(FlowFileTransform):
         tags = ['vastdb', 'arrow']
         description = """Publishes Parquet or JSON data to a Vast DB."""
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         self.vastdb_endpoint = PropertyDescriptor(
             name="VastDB Endpoint",
             description="AWS_S3_ENDPOINT_URL",
@@ -80,10 +80,7 @@ class PutVastDB(FlowFileTransform):
         incoming_data_type = context.getProperty(self.incoming_data_type.name).getValue()
 
         session = self.get_vastdb_session(context)
-        if incoming_data_type == 'Json':
-            pa_table = self.read_json(context, flowfile)
-        else:
-            pa_table = self.read_parquet(context, flowfile)
+        pa_table = self.read_json(flowfile) if incoming_data_type == 'Json' else self.read_parquet(flowfile)
 
         schema = pa_table.schema
 
@@ -100,7 +97,7 @@ class PutVastDB(FlowFileTransform):
         self.write_to_vastdb(context, session, pa_table_without_nulls)
         return FlowFileTransformResult(relationship = "success")
 
-    def read_parquet(self, context, flowfile):
+    def read_parquet(self, flowfile):
         try:
             # Read the FlowFile contents into a byte array
             file_contents = flowfile.getContentsAsBytes()
@@ -109,24 +106,23 @@ class PutVastDB(FlowFileTransform):
             buffer = io.BytesIO(file_contents)
 
             # Read the Parquet data from the buffer
-            pa_table = pq.read_table(buffer)
-
-            return pa_table
+            return pq.read_table(buffer)
         except Exception as e:
-            raise RuntimeError(
-                        f"{e}.  Ensure your parquet is valid and meets pyarrow's requirements." +
-                         "\nSee: https://arrow.apache.org/docs/python/json.html#reading-json-files"
-                    ) from e
+            error_message = (
+                f"{e}.  Ensure your parquet is valid and meets pyarrow's requirements."
+                f"\nSee: https://arrow.apache.org/docs/python/json.html#reading-json-files"
+            )
+            raise RuntimeError(error_message) from e
 
-    def read_json(self, context, flowfile):
+    def read_json(self, flowfile):
         try:
-            pa_table = pa_json.read_json(io.BytesIO(flowfile.getContentsAsBytes()))
-            return pa_table
+            return pa_json.read_json(io.BytesIO(flowfile.getContentsAsBytes()))
         except Exception as e:
-            raise RuntimeError(
-                        f"{e}.  Ensure your json is valid and meets pyarrow's requirements." +
-                         "\nSee: https://arrow.apache.org/docs/python/json.html#reading-json-files"
-                    ) from e
+            error_message = (
+                f"{e}.  Ensure your json is valid and meets pyarrow's requirements."
+                f"\nSee: https://arrow.apache.org/docs/python/json.html#reading-json-files"
+            )
+            raise RuntimeError(error_message) from e
 
     def get_vastdb_session(self, context):
 
@@ -141,9 +137,11 @@ class PutVastDB(FlowFileTransform):
                 secret=credentials.secretAccessKey()
             )
             self.logger.info("Connected to VastDB")
-            return session
         except Exception as e:
-            raise Exception(f"Failed to connect to VastDB: {e}") from e
+            error_message = f"Failed to connect to VastDB: {e}"
+            raise RuntimeError(error_message) from e
+        else:
+            return session
 
     def write_to_vastdb(self, context, session, pa_table):
 
@@ -165,7 +163,8 @@ class PutVastDB(FlowFileTransform):
                 try:
                     table = schema.create_table(vastdb_table, pa_table.schema)
                 except Exception as e:
-                    raise RuntimeError(f"Error creating table '{vastdb_table}' with schema {pa_table.schema}: {e}") from e
+                    error_message = f"Error creating table '{vastdb_table}' with schema {pa_table.schema}: {e}"
+                    raise RuntimeError(error_message) from e
 
             columns_to_add = self.get_columns_to_add(table.arrow_schema, pa_table.schema)
             for column in columns_to_add:

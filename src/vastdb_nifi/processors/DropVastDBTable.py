@@ -17,7 +17,7 @@ class DropVastDBTable(FlowFileTransform):
         tags = ['vastdb', 'arrow']
         description = """Drop Vast DB Table."""
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         self.vastdb_endpoint = PropertyDescriptor(
             name="VastDB Endpoint",
             description="AWS_S3_ENDPOINT_URL",
@@ -83,9 +83,11 @@ class DropVastDBTable(FlowFileTransform):
                 secret=credentials.secretAccessKey()
             )
             self.logger.info("Connected to VastDB")
-            return session
         except Exception as e:
-            raise Exception(f"Failed to connect to VastDB: {e}") from e
+            error_message = f"Failed to connect to VastDB: {e}"
+            raise RuntimeError(error_message) from e
+        else:
+            return session
 
     def drop_table(self, context, flowfile, session):
 
