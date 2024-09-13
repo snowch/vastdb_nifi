@@ -27,6 +27,9 @@ class CustomBuildHook(BuildHookInterface):
     def __init__(self, root, config, *args, **kwargs):
         super().__init__(root, config, *args, **kwargs)
 
+    def update(self, metadata):
+        # Store the version in the metadata
+        metadata['plugin_data']['custom']['version'] = metadata['version']
 
 class NarBundle:
     DIRECTORY_MODE = 0o755
@@ -77,7 +80,9 @@ class NarBundle:
             f"Build-Timestamp: {build_timestamp}",
             f"Nar-Id: {metadata.core.raw_name}-nar",
             f"Nar-Group: {metadata.core.raw_name}",
-            f"Nar-Version: {metadata.version}",
+            # f"Nar-Version: {metadata.version}",
+            f"Nar-Version: {metadata.plugin_data.get('custom', {}).get('version', 'unknown')}",
+
         ]
 
         manifest = io.StringIO()

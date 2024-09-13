@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MIT
 
 import vastdb
-from ._version import __version__
 from nifiapi.flowfiletransform import FlowFileTransform, FlowFileTransformResult
 from nifiapi.properties import ExpressionLanguageScope, PropertyDescriptor, StandardValidators
 
@@ -14,7 +13,7 @@ class DropVastDBTable(FlowFileTransform):
 
     class ProcessorDetails:
         dependencies = ["vastdb"]
-        version = str(__version__)
+        version = "{version}"
         tags = ["vastdb", "arrow"]
         description = """Drop Vast DB Table."""
 
