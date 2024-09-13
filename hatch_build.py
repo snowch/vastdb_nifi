@@ -17,16 +17,17 @@ from typing import Any
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 from hatchling.builders.config import BuilderConfig
-from hatchling.builders.plugin.interface import BuilderInterface
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
+from hatchling.builders.plugin.interface import BuilderInterface
 from hatchling.builders.utils import normalize_archive_path
 from hatchling.metadata.core import ProjectMetadata
+
 
 class CustomBuildHook(BuildHookInterface):
     def __init__(self, root, config, *args, **kwargs):
         super().__init__(root, config, *args, **kwargs)
 
-class NarBundle:    
+class NarBundle:
     DIRECTORY_MODE = 0o755
 
     BUILD_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"

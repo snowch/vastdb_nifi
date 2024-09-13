@@ -2,13 +2,15 @@
 #
 # SPDX-License-Identifier: MIT
 
-from nifiapi.properties import PropertyDescriptor, StandardValidators
-from nifiapi.flowfiletransform import FlowFileTransform, FlowFileTransformResult
 import io
-import vastdb
+
 import pyarrow as pa
 import pyarrow.parquet as pq
+import vastdb
+from nifiapi.flowfiletransform import FlowFileTransform, FlowFileTransformResult
+from nifiapi.properties import PropertyDescriptor, StandardValidators
 from pyarrow import json as pa_json
+
 
 class PutVastDB(FlowFileTransform):
     class Java:

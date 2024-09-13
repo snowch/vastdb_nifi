@@ -2,9 +2,10 @@
 #
 # SPDX-License-Identifier: MIT
 
-from nifiapi.properties import PropertyDescriptor, StandardValidators, ExpressionLanguageScope
-from nifiapi.flowfiletransform import FlowFileTransform, FlowFileTransformResult
 import vastdb
+from nifiapi.flowfiletransform import FlowFileTransform, FlowFileTransformResult
+from nifiapi.properties import ExpressionLanguageScope, PropertyDescriptor, StandardValidators
+
 
 class DropVastDBTable(FlowFileTransform):
     class Java:

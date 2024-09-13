@@ -2,13 +2,15 @@
 #
 # SPDX-License-Identifier: MIT
 
-from nifiapi.properties import PropertyDescriptor, StandardValidators
-from nifiapi.flowfiletransform import FlowFileTransform, FlowFileTransformResult
-import vastdb
-import pyarrow as pa
-import pyarrow.parquet as pq
 import json
 from typing import List
+
+import pyarrow as pa
+import pyarrow.parquet as pq
+import vastdb
+from nifiapi.flowfiletransform import FlowFileTransform, FlowFileTransformResult
+from nifiapi.properties import PropertyDescriptor, StandardValidators
+
 
 class ImportVastDB(FlowFileTransform):
     class Java:
@@ -78,14 +80,14 @@ class ImportVastDB(FlowFileTransform):
         json_content = json.loads(flowfile.getContentsAsBytes())
 
         parquet_file_list = []
-           
+
         for item in json_content:
             if "key" in item and "bucket" in item:
                 transformed_key = f"/{item['bucket']}/{item['key']}"
                 parquet_file_list.append(transformed_key)
             else:
                 raise ValueError("Incoming JSON must have 'key' and 'bucket'")
-        
+
         self.logger.info(f"Received parquet_file_list: {parquet_file_list}")
 
         session = self.get_vastdb_session(context)
@@ -140,8 +142,8 @@ class ImportVastDB(FlowFileTransform):
     def create_table_from_files(
             self,
             context,
-            schema, 
-            table_name: str, 
+            schema,
+            table_name: str,
             parquet_file_list: List[str],
             pa_schema = None
             ):
