@@ -9,11 +9,9 @@ import json
 import pyarrow as pa
 import pyarrow.parquet as pq
 import vastdb
+from _version import __version__
 from nifiapi.flowfiletransform import FlowFileTransform, FlowFileTransformResult
 from nifiapi.properties import PropertyDescriptor, StandardValidators
-
-# ruff: noqa: TID252
-from ._version import __version__
 
 
 class ImportVastDB(FlowFileTransform):
