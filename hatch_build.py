@@ -21,6 +21,7 @@
 import datetime
 import io
 import os
+import platform
 import sys
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
@@ -128,9 +129,12 @@ class CustomBuilder(BuilderInterface):
 
     def build_standard(self, build_directory: str, **_build_data: Any) -> str:
         project_name = self.normalize_file_name_component(self.metadata.core.raw_name)
-        target_nar = Path(build_directory, f"{project_name}-{self.metadata.version}.nar")
+        os_name = platform.system().lower()
+        arch_name = platform.machine().lower()
+        target_nar = Path(build_directory, f"{project_name}-{self.metadata.version}-{os_name}-{arch_name}.nar")
 
         with NarBundle.open_bundle(target_nar) as nar:
+
             nar.write_manifest(self.metadata)
 
             for included_file in self.recurse_included_files():
