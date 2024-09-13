@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
@@ -30,9 +30,6 @@ dependencies = [
 Documentation = "https://github.com/snowch/vastdb-nifi#readme"
 Issues = "https://github.com/snowch/vastdb-nifi/issues"
 Source = "https://github.com/snowch/vastdb-nifi"
-
-[tool.hatch.version]
-path = "src/vastdb_nifi/__about__.py"
 
 [tool.hatch.envs.types]
 extra-dependencies = [
@@ -97,3 +94,6 @@ lint.ignore = [
 
 [tool.ruff.lint.flake8-copyright]
 notice-rgx = "# SPDX-License-Identifier: MIT\n"
+
+[tool.hatch.version]
+source = "vcs"
