@@ -9,6 +9,8 @@ import json
 import pyarrow as pa
 import pyarrow.parquet as pq
 import vastdb
+from ..._version import __version__
+
 from nifiapi.flowfiletransform import FlowFileTransform, FlowFileTransformResult
 from nifiapi.properties import PropertyDescriptor, StandardValidators
 
@@ -19,7 +21,7 @@ class ImportVastDB(FlowFileTransform):
 
     class ProcessorDetails:
         dependencies = ["vastdb", "pyarrow"]
-        version = "0.0.4-SNAPSHOT"
+        version = __version__
         tags = ["vastdb", "arrow"]
         description = """Imports parquet files from S3."""
 

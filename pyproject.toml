@@ -97,3 +97,6 @@ notice-rgx = "# SPDX-License-Identifier: MIT\n"
 
 [tool.hatch.version]
 source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/vastdb_nifi/_version.py"
