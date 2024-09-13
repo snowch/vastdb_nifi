@@ -1,5 +1,6 @@
 # VastDB NiFi
 
+[![Build Status](https://github.com/snowch/vastdb_nifi/actions/workflows/main.yml/badge.svg)](https://github.com/snowch/vastdb_nifi/actions/workflows/main.yml)
 [![Supported Python versions](https://img.shields.io/badge/python-3.7&nbsp;%7C%203.8&nbsp;%7C%203.9&nbsp;%7C%203.10&nbsp;%7C%203.11-blue)](https://www.python.org/)
 [![Supported Platforms](https://img.shields.io/badge/platform-macos%20%7C%20linux-lightgrey)](https://www.python.org/)
 
@@ -7,8 +8,19 @@
 
 ## Table of Contents
 
-- [Installation](#build)
+- [Installation](#installation)
+- [Build](#build)
 - [License](#license)
+
+## Installation
+
+**Pre-requisites**
+
+ - [NiFi Standard 2.0.0-M4](https://nifi.apache.org/download/) [or later] installed (the installation directory will be referred to as `$NIFI_HOME`)
+ - Uncomment `nifi.python.command=python3` in `$NIFI_HOME/conf/nifi.properties`
+ - Python3 must be 3.9+
+ - Download the [nar file](https://github.com/snowch/vastdb_nifi/actions/workflows/main.yml) for your platform
+ - Add the nar file to `$NIFI_HOME/extensions`
 
 ## Build
 
