@@ -12,7 +12,7 @@ from nifiapi.properties import PropertyDescriptor, StandardValidators
 from pyarrow import json as pa_json
 
 # ruff: noqa: TID252
-from ..._version import __version__
+from ._version import __version__
 
 
 class PutVastDB(FlowFileTransform):

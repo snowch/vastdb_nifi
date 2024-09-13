@@ -69,7 +69,7 @@ exclude = [
 "src/vastdb_nifi/processors/PutVastDB.py" = "PutVastDB.py"
 "src/vastdb_nifi/processors/ImportVastDB.py" = "ImportVastDB.py"
 "src/vastdb_nifi/processors/DropVastDBTable.py" = "DropVastDBTable.py"
-
+"src/vastdb_nifi/processors/_version.py" = "_version.py"
 
 [tool.ruff]
 preview = true
@@ -99,4 +99,4 @@ notice-rgx = "# SPDX-License-Identifier: MIT\n"
 source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "src/vastdb_nifi/_version.py"
+version-file = "src/vastdb_nifi/processors/_version.py"

@@ -7,7 +7,7 @@ from nifiapi.flowfiletransform import FlowFileTransform, FlowFileTransformResult
 from nifiapi.properties import ExpressionLanguageScope, PropertyDescriptor, StandardValidators
 
 # ruff: noqa: TID252
-from ..._version import __version__
+from ._version import __version__
 
 
 class DropVastDBTable(FlowFileTransform):
