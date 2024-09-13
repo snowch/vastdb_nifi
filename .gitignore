@@ -2,3 +2,6 @@
 __pycache__
 dist
 src/vastdb_nifi/_version.py
+.pytest_cache/
+.ruff_cache/
+src/vastdb_nifi/processors/_version.py
