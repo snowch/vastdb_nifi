@@ -26,3 +26,8 @@ jobs:
         pip install hatch
     - name: Build
       run: hatch build -t custom
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: nar-artifacts
+        path: dist/*.nar
