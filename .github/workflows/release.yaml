@@ -28,7 +28,7 @@ jobs:
           pip install hatch hatchling
 
       - name: Build NAR
-          run: hatch build -t custom
+        run: hatch build -t custom
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
