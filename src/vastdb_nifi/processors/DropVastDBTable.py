@@ -14,7 +14,7 @@ class DropVastDBTable(FlowFileTransform):
 
     class ProcessorDetails:
         dependencies = ["vastdb"]
-        version = __version__
+        version = str(__version__)
         tags = ["vastdb", "arrow"]
         description = """Drop Vast DB Table."""
 
