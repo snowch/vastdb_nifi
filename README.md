@@ -12,6 +12,7 @@
 
 - [Installation](#installation)
 - [Build](#build)
+- [Develop](#develop)
 - [License](#license)
 
 ## Installation
@@ -26,6 +27,13 @@
 
 ```console
 hatch build -t custom
+```
+
+## Develop
+
+```console
+git tag vX.Y.Z
+git push origin --tags
 ```
 
 ## License
