@@ -5,13 +5,13 @@ build-backend = "hatchling.build"
 [project]
 name = "vastdb-nifi"
 dynamic = ["version"]
-description = ''
+description = 'VastDB NiFi Processors.'
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
 keywords = []
 authors = [
-  { name = "snowch", email = "chsnow123@gmail.com" },
+  { name = "Chris Snow", email = "chris.snow@vastdata.com" },
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -62,3 +62,8 @@ exclude_lines = [
 
 [tool.hatch.build.hooks.custom]
 path = "hatch_build.py"
+
+[tool.hatch.build.targets]
+exclude = [
+  "hatch_build.py"
+]
