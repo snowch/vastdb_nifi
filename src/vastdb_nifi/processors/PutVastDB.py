@@ -7,7 +7,7 @@ import io
 import pyarrow as pa
 import pyarrow.parquet as pq
 import vastdb
-from _version import __version__
+from ._version import __version__
 from nifiapi.flowfiletransform import FlowFileTransform, FlowFileTransformResult
 from nifiapi.properties import PropertyDescriptor, StandardValidators
 from pyarrow import json as pa_json
