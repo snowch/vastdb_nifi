@@ -4,7 +4,6 @@
 
 import datetime
 import io
-import json
 import os
 import platform
 import sys
@@ -27,6 +26,7 @@ from hatchling.metadata.core import ProjectMetadata
 class CustomBuildHook(BuildHookInterface):
     def __init__(self, root, config, *args, **kwargs):
         super().__init__(root, config, *args, **kwargs)
+
 
 class NarBundle:
     DIRECTORY_MODE = 0o755
@@ -136,12 +136,12 @@ class CustomBuilder(BuilderInterface):
                 self.process_dependencies(build_directory, nar)
 
         return os.fspath(target_nar)
-    
+
     def process_processor_file(self, file_path: Path):
         """Processes a processor file to replace version placeholders."""
         from src.vastdb_nifi.processors._version import __version__
 
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             content = f.read()
 
         if 'implements = ["org.apache.nifi.python.processor.FlowFileTransform"]' in content:
