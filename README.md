@@ -14,19 +14,15 @@
 
 - [Overview](#overview)
 - [Installation](#installation)
-- [Build](#build)
-- [Develop](#develop)
 - [License](#license)
 
 ## Overview
 
-This project contains NiFi 2.0.0 Python Processors for Vast DataBase:
+This is a **community supported** project containing NiFi 2.0.0 Python Processors for Vast DataBase:
 
-- DropVastDB: Drop a Vast DB Table
-- ImportVastDB: Imports parquet files from Vast S3
-- PutVastDB: Writes Parquet or JSON data to a Vast DB Table
-
-**This project is community supported.**
+- **DropVastDB**: Drop a Vast DataBase Table
+- **ImportVastDB**: Imports parquet files from Vast S3
+- **PutVastDB**: Writes Parquet or JSON data to a Vast DataBase Table
 
 ## Installation
 
@@ -35,19 +31,6 @@ This project contains NiFi 2.0.0 Python Processors for Vast DataBase:
  - Python3 must be 3.9+
  - Download the [nar file](https://github.com/snowch/vastdb_nifi/releases/latest) for your platform and Python version
  - Add the nar file to `$NIFI_HOME/extensions`
-
-## Build
-
-```console
-hatch build -t custom
-```
-
-## Develop
-
-```console
-git tag vX.Y.Z
-git push origin --tags
-```
 
 ## License
 
