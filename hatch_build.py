@@ -6,6 +6,7 @@ import datetime
 import io
 import os
 import platform
+import re
 import sys
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
@@ -145,7 +146,12 @@ class CustomBuilder(BuilderInterface):
             content = f.read()
 
         if 'implements = ["org.apache.nifi.python.processor.FlowFileTransform"]' in content:
-            content = content.replace("{{version}}", str(__version__))
+            content = re.sub(
+                r"        version = .*$",
+                f'        version = "{__version__}"  # auto generated - do not edit',
+                content,
+                flags=re.MULTILINE,
+            )
 
         with open(file_path, "w") as f:
             f.write(content)
