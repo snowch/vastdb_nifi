@@ -13,7 +13,7 @@ class DropVastDBTable(FlowFileTransform):
 
     class ProcessorDetails:
         dependencies = ["vastdb"]
-        version = "{version}"
+        version = "0.0.19.dev1+ge57f99b.d20240914"
         tags = ["vastdb", "arrow"]
         description = """Drop Vast DB Table."""
 

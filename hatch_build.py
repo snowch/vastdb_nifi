@@ -28,12 +28,6 @@ class CustomBuildHook(BuildHookInterface):
     def __init__(self, root, config, *args, **kwargs):
         super().__init__(root, config, *args, **kwargs)
 
-    def update(self, metadata):
-        # Store the version in a temporary JSON file
-        version_data = {'version': metadata['version']}
-        with open('version.json', 'w') as f:
-            json.dump(version_data, f)
-
 class NarBundle:
     DIRECTORY_MODE = 0o755
 
@@ -77,9 +71,7 @@ class NarBundle:
 
         build_timestamp = current_timestamp.strftime(self.BUILD_TIMESTAMP_FORMAT)
 
-        with open('version.json', 'r') as f:
-            version_data = json.load(f)
-        version = version_data.get('version', 'unknown')
+        from src.vastdb_nifi.processors._version import __version__
 
         manifest_lines = [
             "Manifest-Version: 1.0",
@@ -87,9 +79,7 @@ class NarBundle:
             f"Build-Timestamp: {build_timestamp}",
             f"Nar-Id: {metadata.core.raw_name}-nar",
             f"Nar-Group: {metadata.core.raw_name}",
-            # f"Nar-Version: {metadata.version}",
-            f"Nar-Version: {version}",
-
+            f"Nar-Version: {__version__}",
         ]
 
         manifest = io.StringIO()
@@ -138,6 +128,7 @@ class CustomBuilder(BuilderInterface):
 
             for included_file in self.recurse_included_files():
                 included_file_path = Path(included_file.path)
+                self.process_processor_file(included_file_path)
                 nar.add_entry(included_file_path, included_file.distribution_path)
 
             if self.metadata.core.dependencies:
@@ -145,6 +136,19 @@ class CustomBuilder(BuilderInterface):
                 self.process_dependencies(build_directory, nar)
 
         return os.fspath(target_nar)
+    
+    def process_processor_file(self, file_path: Path):
+        """Processes a processor file to replace version placeholders."""
+        from src.vastdb_nifi.processors._version import __version__
+
+        with open(file_path, "r") as f:
+            content = f.read()
+
+        if 'implements = ["org.apache.nifi.python.processor.FlowFileTransform"]' in content:
+            content = content.replace("{{version}}", str(__version__))
+
+        with open(file_path, "w") as f:
+            f.write(content)
 
     def process_dependencies(self, build_directory: str, nar: NarBundle) -> None:
         nar_inf_dir = "NAR-INF"

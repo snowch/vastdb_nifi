@@ -18,7 +18,7 @@ class PutVastDB(FlowFileTransform):
 
     class ProcessorDetails:
         dependencies = ["vastdb", "pyarrow"]
-        version = "{version}"
+        version = "0.0.19.dev1+ge57f99b.d20240914"
         tags = ["vastdb", "arrow"]
         description = """Publishes Parquet or JSON data to a Vast DB."""
 
